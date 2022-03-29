@@ -6,6 +6,8 @@ $(document).ready(function () {
 
     $('#Klassenauswahl').change(function(){
         $('#Tabelle').removeClass("visually-hidden")
+        $('#Stundenplannavigation').removeClass("visually-hidden")
+
     })
 
 /*
