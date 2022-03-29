@@ -77,21 +77,27 @@ $(document).ready(function () {
     function tabelle(klasse) {
         $.ajax({
             type: "GET",
-            url: "http://sandbox.gibm.ch/tafel.php?klasse_id=" + klasse ,
+            url: "http://sandbox.gibm.ch/tafel.php?klasse_id=" + klasse,
             data: { format: 'JSON' }, // format mitgeben
             dataType: 'json'
         }).done(function (data) {
             $.each(data, function (key, value) {
-                $('#tabelle').append('<td>' + value.tafel_datum + '</td>');
-                $('#tabelle').append('<td>' + value.tafel_wochentag + '</td>');
-                $('#tabelle').append('<td>' + value.tafel_von + '</td>');
-                $('#tabelle').append('<td>' + value.tafel_bis + '</td>');
-                $('#tabelle').append('<td>' + value.tafel_lehrer + '</td>');
-                $('#tabelle').append('<td>' + value.tafel_longfach + '</td>');
-                $('#tabelle').append('<td>' + value.tafel_raum + '</td>');
+                $('#tabelle').append('<tr>'),
+                    $('#tabelle').append('<td>' + value.tafel_datum + '</td>'),
+                    $('#tabelle').append('<td>' + Wochentag(value.tafel_wochentag) + '</td>'),
+                    $('#tabelle').append('<td>' + value.tafel_von + '</td>'),
+                    $('#tabelle').append('<td>' + value.tafel_bis + '</td>'),
+                    $('#tabelle').append('<td>' + value.tafel_lehrer + '</td>'),
+                    $('#tabelle').append('<td>' + value.tafel_longfach + '</td>'),
+                    $('#tabelle').append('<td>' + value.tafel_raum + '</td>');
             })
         }).fail(function () {
             $('#errorMessage').text("Fehler aufgetreten");
         })
+    }
+
+    function Wochentag(zahl) {
+        var wochentage = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag']
+        return wochentage[zahl];
     }
 }) 
