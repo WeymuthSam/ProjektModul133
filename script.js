@@ -2,14 +2,21 @@ $(document).ready(function () {
     $('#Berufsgruppe').change(function () {
         $('#Klassenauswahl').removeClass("visually-hidden")
         $('#TitelKlassenauswahl').removeClass("visually-hidden")
+        $('#klasse').empty();
+        localStorage.setItem("berufsgruppe", this.value)
+        klasse(this.value);
     })
 
     $('#Klassenauswahl').change(function () {
         $('#Tabelle').removeClass("visually-hidden")
         $('#Stundenplannavigation').removeClass("visually-hidden")
-
+        $('#tabelle').empty();
+        localStorage.setItem("klassenauswahl", this.value)
+        tabelle(this.value);
     })
 
+
+    
     $.ajax({
         type: "GET",
         url: "http://sandbox.gibm.ch/berufe.php",
@@ -31,6 +38,10 @@ $(document).ready(function () {
 
 
     function klasse(berufsgruppe) {
+        $('#Klassenauswahl').empty()
+        $('#tabelle').empty()
+        //$('#Klassenauswahl').addClass("visually-hidden")
+       // $('#TitelKlassenauswahl').addClass("visually-hidden")
         $.ajax({
             type: "GET",
             url: "http://sandbox.gibm.ch/klassen.php?beruf_id=" + berufsgruppe,
@@ -60,21 +71,8 @@ $(document).ready(function () {
         tabelle(localStorage.getItem("klasse"))
     }
 
-
-    $('#Berufsgruppe').change(function () {
-        $('#klassauswahl').empty();
-        localStorage.setItem("berufsgruppe", this.value)
-        klasse(this.value);
-    })
-
-    $('#Klassenauswahl').change(function () {
-        $('#tabelle').empty();
-        localStorage.setItem("klassenauswahl", this.value)
-        tabelle(this.value);
-    })
-
-
     function tabelle(klasse) {
+       // $('#Tabelle').empty()
         $.ajax({
             type: "GET",
             url: "http://sandbox.gibm.ch/tafel.php?klasse_id=" + klasse,
@@ -83,7 +81,7 @@ $(document).ready(function () {
         }).done(function (data) {
             $.each(data, function (key, value) {
                 $('#tabelle').append('<tr>'),
-                    $('#tabelle').append('<td>' + value.tafel_datum + '</td>'),
+                    $('#tabelle').append('<td>' + Datum(value.tafel_datum) + '</td>'),
                     $('#tabelle').append('<td>' + Wochentag(value.tafel_wochentag) + '</td>'),
                     $('#tabelle').append('<td>' + value.tafel_von + '</td>'),
                     $('#tabelle').append('<td>' + value.tafel_bis + '</td>'),
@@ -99,5 +97,14 @@ $(document).ready(function () {
     function Wochentag(zahl) {
         var wochentage = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag']
         return wochentage[zahl];
+    }
+
+    function Datum(datum) {
+        const formatDate = (datum) => {
+            const [year, month, day] = datum.split('-')
+            const formatted_date = [day, month, year].join('.')
+            return formatted_date;
+        }
+        return formatDate(datum);
     }
 }) 
