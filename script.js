@@ -13,20 +13,22 @@ $(document).ready(function () {
         $('#tabelle').empty();
         localStorage.setItem("klassenauswahl", this.value)
         tabelle(this.value);
+
     })
 
-
-    
     $.ajax({
         type: "GET",
         url: "http://sandbox.gibm.ch/berufe.php",
         data: { format: 'JSON' }, // format mitgeben
         dataType: 'json'
     }).done(function (data) {
-        $('#Berufsgruppe')
+        $('#Berufsgruppe').append('<option>Bitte wählen Sie einen Beruf</option>')
         $.each(data, function (key, value) {
             if (value.beruf_id == localStorage.getItem('berufsgruppe')) {
                 $('#Berufsgruppe').append('<option class=' + value.beruf_id + ' value=' + value.beruf_id + ' selected>' + value.beruf_name + '</option>');
+                $('#Klassenauswahl').removeClass("visually-hidden")
+                $('#TitelKlassenauswahl').removeClass("visually-hidden")
+                klasse(value.beruf_id)
             } else {
                 $('#Berufsgruppe').append('<option class=' + value.beruf_id + ' value=' + value.beruf_id + '>' + value.beruf_name + '</option>');
             }
@@ -41,17 +43,24 @@ $(document).ready(function () {
         $('#Klassenauswahl').empty()
         $('#tabelle').empty()
         //$('#Klassenauswahl').addClass("visually-hidden")
-       // $('#TitelKlassenauswahl').addClass("visually-hidden")
+        // $('#TitelKlassenauswahl').addClass("visually-hidden")
         $.ajax({
             type: "GET",
             url: "http://sandbox.gibm.ch/klassen.php?beruf_id=" + berufsgruppe,
             data: { format: 'JSON' }, // format mitgeben
             dataType: 'json'
         }).done(function (data) {
-            $('#Klassenauswahl')
+            if (data == null) {
+                alert('Keine Daten gefunden')
+            } else { }
+            $('#Klassenauswahl').append('<option>Bitte wählen Sie die Klasse</option>')
+            //$('#Klassenauswahl')
             $.each(data, function (key, value) {
-                if (value.klasse_id == localStorage.getItem('klasse')) {
+                if (value.klasse_id == localStorage.getItem('klassenauswahl')) {
                     $('#Klassenauswahl').append('<option class=' + value.klasse_id + ' value=' + value.klasse_id + ' selected>' + value.klasse_name + ' , ' + value.klasse_longname + '</option>');
+                    $('#Tabelle').removeClass("visually-hidden")
+                    $('#Stundenplannavigation').removeClass("visually-hidden")
+                    tabelle(value.klasse_id)
                 } else {
                     $('#Klassenauswahl').append('<option class=' + value.klasse_id + ' value=' + value.klasse_id + '>' + value.klasse_name + ' , ' + value.klasse_longname + '</option>');
                 }
@@ -62,17 +71,8 @@ $(document).ready(function () {
         })
     }
 
-    if (localStorage.getItem("berufsgruppe")) {
-        klasse(localStorage.getItem("berufsgruppe"))
-    }
-
-
-    if (localStorage.getItem("klasse")) {
-        tabelle(localStorage.getItem("klasse"))
-    }
-
     function tabelle(klasse) {
-       // $('#Tabelle').empty()
+        // $('#Tabelle').empty()
         $.ajax({
             type: "GET",
             url: "http://sandbox.gibm.ch/tafel.php?klasse_id=" + klasse,
@@ -80,6 +80,18 @@ $(document).ready(function () {
             dataType: 'json'
         }).done(function (data) {
             $.each(data, function (key, value) {
+                var altesDatum = value.tafel_datum
+
+                $('#Datum').text(moment(altesDatum, 'YYYY-MM-DD').format('WW-YYYY'))
+
+                $('#Vor').click(function () {
+                    $('#Datum').text(moment(altesDatum, "yyyy-MM-DD").add(7, 'days').format('WW-YYYY'))
+                })
+
+                $('#Zurueck').click(function () {
+                    $('#Datum').text(moment(altesDatum, "yyyy-MM-DD").subtract(7, 'days').format('WW-YYYY'))
+                })
+
                 $('#tabelle').append('<tr>'),
                     $('#tabelle').append('<td>' + Datum(value.tafel_datum) + '</td>'),
                     $('#tabelle').append('<td>' + Wochentag(value.tafel_wochentag) + '</td>'),
@@ -107,4 +119,11 @@ $(document).ready(function () {
         }
         return formatDate(datum);
     }
+
+
+
+
+
+
+
 }) 
