@@ -1,4 +1,9 @@
 $(document).ready(function () {
+    if(localStorage.getItem('altesDatum') == null || localStorage.getItem('altesDatum')== ""){
+        localStorage.setItem('altesDatum', moment().format('WW-GGGG'))
+    }
+    $('#Datum').text(localStorage.getItem('altesDatum'))
+    
     $('#Berufsgruppe').change(function () {
         $('#Klassenauswahl').removeClass("visually-hidden")
         $('#TitelKlassenauswahl').removeClass("visually-hidden")
@@ -12,7 +17,7 @@ $(document).ready(function () {
         $('#Stundenplannavigation').removeClass("visually-hidden")
         $('#tabelle').empty();
         localStorage.setItem("klassenauswahl", this.value)
-        tabelle(this.value);
+        tabelle();
 
     })
 
@@ -60,7 +65,7 @@ $(document).ready(function () {
                     $('#Klassenauswahl').append('<option class=' + value.klasse_id + ' value=' + value.klasse_id + ' selected>' + value.klasse_name + ' , ' + value.klasse_longname + '</option>');
                     $('#Tabelle').removeClass("visually-hidden")
                     $('#Stundenplannavigation').removeClass("visually-hidden")
-                    tabelle(value.klasse_id)
+                    tabelle()
                 } else {
                     $('#Klassenauswahl').append('<option class=' + value.klasse_id + ' value=' + value.klasse_id + '>' + value.klasse_name + ' , ' + value.klasse_longname + '</option>');
                 }
@@ -71,26 +76,30 @@ $(document).ready(function () {
         })
     }
 
-    function tabelle(klasse) {
-        // $('#Tabelle').empty()
+    $('#Zurueck').click(function () {
+        var date = localStorage.getItem('altesDatum')
+        localStorage.setItem("altesDatum", moment(date, "WW-GGGG").subtract(7, 'days').format('WW-GGGG'));
+        $('#Datum').text(localStorage.getItem('altesDatum'))
+        tabelle()
+    })
+
+    $('#Vor').click(function () {
+        var date = localStorage.getItem('altesDatum')
+        localStorage.setItem("altesDatum", moment(date, "WW-GGGG").add(7, 'days').format('WW-GGGG'));
+        $('#Datum').text(localStorage.getItem('altesDatum'))
+        tabelle()
+
+    })
+
+    function tabelle() {
+        $('#tabelle').empty()
         $.ajax({
             type: "GET",
-            url: "http://sandbox.gibm.ch/tafel.php?klasse_id=" + klasse,
+            url: "http://sandbox.gibm.ch/tafel.php?klasse_id=" + localStorage.getItem('klassenauswahl') + "&woche=" + localStorage.getItem('altesDatum'),
             data: { format: 'JSON' }, // format mitgeben
             dataType: 'json'
         }).done(function (data) {
             $.each(data, function (key, value) {
-                var altesDatum = value.tafel_datum
-
-                $('#Datum').text(moment(altesDatum, 'YYYY-MM-DD').format('WW-YYYY'))
-
-                $('#Vor').click(function () {
-                    $('#Datum').text(moment(altesDatum, "yyyy-MM-DD").add(7, 'days').format('WW-YYYY'))
-                })
-
-                $('#Zurueck').click(function () {
-                    $('#Datum').text(moment(altesDatum, "yyyy-MM-DD").subtract(7, 'days').format('WW-YYYY'))
-                })
 
                 $('#tabelle').append('<tr>'),
                     $('#tabelle').append('<td>' + Datum(value.tafel_datum) + '</td>'),
@@ -119,11 +128,5 @@ $(document).ready(function () {
         }
         return formatDate(datum);
     }
-
-
-
-
-
-
 
 }) 
