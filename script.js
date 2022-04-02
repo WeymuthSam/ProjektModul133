@@ -1,9 +1,15 @@
 $(document).ready(function () {
-    if(localStorage.getItem('altesDatum') == null || localStorage.getItem('altesDatum')== ""){
+    $(document).ajaxStart(function () {
+        $('#loading').removeClass('visually-hidden');
+    })
+    $(document).ajaxStop(function () {
+        $('#loading').addClass('visually-hidden');
+    })
+    if (localStorage.getItem('altesDatum') == null || localStorage.getItem('altesDatum') == "") {
         localStorage.setItem('altesDatum', moment().format('WW-GGGG'))
     }
     $('#Datum').text(localStorage.getItem('altesDatum'))
-    
+
     $('#Berufsgruppe').change(function () {
         $('#Klassenauswahl').removeClass("visually-hidden")
         $('#TitelKlassenauswahl').removeClass("visually-hidden")
