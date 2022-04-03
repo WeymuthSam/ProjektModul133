@@ -1,7 +1,7 @@
 $(document).ready(function () { // wenn der Dom geladen ist
 
     $(document).ajaxStart(function () { //Bei einem ajax request wird der Loading button sichtbargesetzt
-        $('#loading').removeClass('visually-hidden');
+        $('#loading').removeClass('visually-hidden');//(Inspiriert bei Julian)
     })
     $(document).ajaxStop(function () { //beim stopp wieder sichtbar false
         $('#loading').addClass('visually-hidden');
@@ -17,6 +17,7 @@ $(document).ready(function () { // wenn der Dom geladen ist
         localStorage.setItem('altesDatum', moment().format('WW-GGGG'))
         $('#Datum').text(localStorage.getItem('altesDatum'))
         localStorage.setItem("berufsgruppe", this.value) // wird die Berufsgruppe im Localstorage gespeichert
+        localStorage.removeItem("klassenauswahl")
         klasse(); // Function Klasse wird aufgerufen
     })
 
@@ -28,20 +29,25 @@ $(document).ready(function () { // wenn der Dom geladen ist
     })
 
     $.ajax({ // ajax abfrage block ( asynchron)
-        type: "GET", 
-        url: "http://sandbox.gibm.ch/berufe.php", 
+        type: "GET",
+        url: "http://sandbox.gibm.ch/berufe.php",
         data: { format: 'JSON' }, // format mitgeben
         dataType: 'json'
     }).done(function (data) {
-        $('#Berufsgruppe').append('<option>Bitte wählen Sie einen Beruf</option>') // Berufgruppefeld wird mit einem AUswahlfeld erweitert
-        $.each(data, function (key, value) {
-            if (value.beruf_id == localStorage.getItem('berufsgruppe')) { // wenn die Berufid dem Beruf aus dem Localstorage übereinstimmt
-                $('#Berufsgruppe').append('<option class=' + value.beruf_id + ' value=' + value.beruf_id + ' selected>' + value.beruf_name + '</option>'); // wird in das feld die Berufe gesetzt
-                klasse() // aufruf nach function klasse
-            } else {
-                $('#Berufsgruppe').append('<option class=' + value.beruf_id + ' value=' + value.beruf_id + '>' + value.beruf_name + '</option>'); //wird in das feld die Berufe gesetzt
-            }
-        })
+        if (data != '' || data == null) {
+            $('#errorMessage').removeClass("alert alert-warning")
+            $('#Berufsgruppe').append('<option value="default" >Ihre Auswahl ... </option>');// Berufgruppefeld wird mit einem AUswahlfeld erweitert
+            $.each(data, function (key, value) {
+                if (value.beruf_id == localStorage.getItem('berufsgruppe')) { // wenn die Berufid dem Beruf aus dem Localstorage übereinstimmt
+                    $('#Berufsgruppe').append('<option value="' + value.beruf_id + '" selected>' + value.beruf_name + '</option>'); // wird in das feld die Berufe gesetzt
+                    klasse() // aufruf nach function klasse
+                } else {
+                    $('#Berufsgruppe').append('<option value=' + value.beruf_id + '>' + value.beruf_name + '</option>'); //wird in das feld die Berufe gesetzt
+                }
+            })
+        } else {
+            $('#errorMessage').html('<div class="alert alert-warning">Keine Berufe gefunden ...</div>')
+        }
     }).fail(function () {
         $('#errorMessage').text("Fehler aufgetreten"); // wenn etwas mit dem abfrage nicht stimmt wird eine warnung ausgegeben.
     })
@@ -50,8 +56,6 @@ $(document).ready(function () { // wenn der Dom geladen ist
     function klasse() {
         $('#Stundenplannavigation').addClass("visually-hidden") // wird Stundenplannavigation unsichbar gesetzt
         $('#Tabelle').addClass("visually-hidden") // wird Tabelle unsichbar gesetzt
-        $('#Klassenauswahl').removeClass("visually-hidden") // wird Klassenauswahl sichbar gesetzt
-        $('#TitelKlassenauswahl').removeClass("visually-hidden")  //wird Titel der Klassenauswahl  wird sichbar gesetzt
         $('#Klassenauswahl').empty() // Feld Klassenauwahl wird geleert
         $('#tabelle').empty() // Inhalt der Tabelle wird geleert
 
@@ -61,18 +65,35 @@ $(document).ready(function () { // wenn der Dom geladen ist
             data: { format: 'JSON' }, // format mitgeben
             dataType: 'json'
         }).done(function (data) {
-            $('#Klassenauswahl').append('<option>Bitte wählen Sie die Klasse</option>') // wieder wird ein Auswahlvorschlag gegeben
-            $.each(data, function (key, value) {
-                if (value.klasse_id == localStorage.getItem('klassenauswahl')) { // wenn die klasse dem Localstore entspricht
-                    $('#Klassenauswahl').append('<option class=' + value.klasse_id + ' value=' + value.klasse_id + ' selected>' + value.klasse_name + ' , ' + value.klasse_longname + '</option>'); // Klassen werden gesetzt
-                    tabelle() //function tabelle wird aufrufen
-                } else {
-                    $('#Klassenauswahl').append('<option class=' + value.klasse_id + ' value=' + value.klasse_id + '>' + value.klasse_name + ' , ' + value.klasse_longname + '</option>');// Klassen werden gesetzt
-                }
+            if (data != '' || data == null) {
+                $('#Klassenauswahl').removeClass("visually-hidden") // wird Klassenauswahl sichbar gesetzt
+                $('#InfoKlassenauswahl').removeClass("visually-hidden")
+                $('#TitelKlassenauswahl').removeClass("visually-hidden")  //wird Titel der Klassenauswahl  wird sichbar gesetzt
+                $('#errorMessage').empty()
+                $('#Klassenauswahl').append('<option value="default" >Ihre Auswahl ... </option>'); // wieder wird ein Auswahlvorschlag gegeben
+                $.each(data, function (key, value) {
+                    if (value.klasse_id == localStorage.getItem('klassenauswahl')) { // wenn die klasse dem Localstore entspricht
+                        $('#Klassenauswahl').append('<option value=' + value.klasse_id + ' selected>' + value.klasse_name + ' , ' + value.klasse_longname + '</option>'); // Klassen werden gesetzt
+                        tabelle() //function tabelle wird aufrufen
+                    } else {
+                        $('#Klassenauswahl').append('<option value=' + value.klasse_id + '>' + value.klasse_name + ' , ' + value.klasse_longname + '</option>');// Klassen werden gesetzt
+                    }
 
-            })
+                })
+            } else {
+                $('#errorMessage').html('<div class="alert alert-warning">Keine Klassen vorhanden</div>')
+                $('#Klassenauswahl').addClass("visually-hidden") // wird Klassenauswahl unsichtbar gesetzt
+                $('#InfoKlassenauswahl').addClass("visually-hidden")
+                $('#TitelKlassenauswahl').addClass("visually-hidden")
+            }
         }).fail(function () {
-            $('#errorMessage').text("Fehler aufgetreten"); // fehler wird ausgeben wenn api abfrage fehlschlägt
+            $('#errorMessage').html('<div class="alert alert-warning">Fehler bei der API-Abfrage beginnen Sie vom Anfang</div>');
+            $('#Klassenauswahl').addClass("visually-hidden") // wird Klassenauswahl unsichtbar gesetzt
+            $('#InfoKlassenauswahl').addClass("visually-hidden")
+            $('#TitelKlassenauswahl').addClass("visually-hidden")  // fehler wird ausgeben wenn api abfrage fehlschlägt
+            $('#Klassenauswahl').addClass("visually-hidden")
+            $('#Tabelle').addClass("visually-hidden") // tabelle wird UNsichtbar gesetzt 
+            $('#Stundenplannavigation').addClass("visually-hidden") // navigation wird UNsichtbar gesetzt 
         })
     }
 
@@ -101,18 +122,30 @@ $(document).ready(function () { // wenn der Dom geladen ist
             data: { format: 'JSON' }, // format mitgeben
             dataType: 'json'
         }).done(function (data) {
-            $.each(data, function (key, value) {
-                $('#tabelle').append('<tr>'),
-                    $('#tabelle').append('<td>' + Datum(value.tafel_datum) + '</td>'),
-                    $('#tabelle').append('<td>' + Wochentag(value.tafel_wochentag) + '</td>'),
-                    $('#tabelle').append('<td>' + value.tafel_von + '</td>'),
-                    $('#tabelle').append('<td>' + value.tafel_bis + '</td>'),
-                    $('#tabelle').append('<td>' + value.tafel_lehrer + '</td>'),
-                    $('#tabelle').append('<td>' + value.tafel_longfach + '</td>'),
-                    $('#tabelle').append('<td>' + value.tafel_raum + '</td>');
-            })
+            if (data != '' || data == null) {
+
+                $('#errorMessage').empty()
+                $.each(data, function (key, value) {
+                    $('#tabelle').append('<tr>' +
+                        '<td>' + Datum(value.tafel_datum) + '</td>' +
+                        '<td>' + Wochentag(value.tafel_wochentag) + '</td>' +
+                        '<td>' + value.tafel_von + '</td>' +
+                        '<td>' + value.tafel_bis + '</td>' +
+                        '<td>' + value.tafel_lehrer + '</td>' +
+                        '<td>' + value.tafel_longfach + '</td>' +
+                        '<td>' + value.tafel_raum + '</td>'
+                    );
+                })
+            } else {
+                $('#errorMessage').html('<div class="alert alert-warning">Kein Stundenplan für diese Woche vorhanden</div>')
+            }
         }).fail(function () {
-            $('#errorMessage').text("Fehler aufgetreten"); // bei falschen request wird ein error ausgegeben.
+            $('#errorMessage').html('<div class="alert alert-warning">Fehler bei der API-Abfrage beginnen Sie vom Anfang</div>');  // bei falschen request wird ein error ausgegeben.
+            $('#InfoKlassenauswahl').addClass("visually-hidden")
+            $('#TitelKlassenauswahl').addClass("visually-hidden")  // fehler wird ausgeben wenn api abfrage fehlschlägt
+            $('#Klassenauswahl').addClass("visually-hidden")
+            $('#Tabelle').addClass("visually-hidden") // tabelle wird UNsichtbar gesetzt 
+            $('#Stundenplannavigation').addClass("visually-hidden") // navigation wird UNsichtbar gesetzt 
         })
     }
 
