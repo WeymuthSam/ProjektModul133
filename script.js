@@ -115,7 +115,6 @@ $(document).ready(function () { // wenn der Dom geladen ist
     })
 
     function tabelle() {
-        $('#Tabelle').removeClass("visually-hidden") // tabelle wird sichtbar gesetzt 
         $('#Stundenplannavigation').removeClass("visually-hidden") // navigation wird sichtbar gesetzt
         $('#tabelle').empty() // tabellen inhalt wird geleert
         $.ajax({ // ajax request anhand der klasse und des datums um den korrekten stundenplan zu erhalten
@@ -125,6 +124,8 @@ $(document).ready(function () { // wenn der Dom geladen ist
             dataType: 'json'
         }).done(function (data) {
             if (data != '' || data == null) {
+                $('#Tabelle').removeClass("visually-hidden") // tabelle wird sichtbar gesetzt 
+               
 
                 $('#errorMessage').empty()
                 $.each(data, function (key, value) {
