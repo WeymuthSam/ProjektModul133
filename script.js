@@ -42,9 +42,11 @@ $(document).ready(function () { // wenn der Dom geladen ist
             $.each(data, function (key, value) {
                 if (value.beruf_id == localStorage.getItem('berufsgruppe')) { // wenn die Berufid dem Beruf aus dem Localstorage übereinstimmt
                     $('#Berufsgruppe').append('<option value="' + value.beruf_id + '" selected>' + value.beruf_name + '</option>'); // wird in das feld die Berufe gesetzt
+                    $('#InfoBerufsauswahl').addClass("visually-hidden")
                     klasse() // aufruf nach function klasse
                 } else {
                     $('#Berufsgruppe').append('<option value=' + value.beruf_id + '>' + value.beruf_name + '</option>'); //wird in das feld die Berufe gesetzt
+                    
                 }
             })
         } else {
@@ -76,8 +78,10 @@ $(document).ready(function () { // wenn der Dom geladen ist
                 $.each(data, function (key, value) {
                     if (value.klasse_id == localStorage.getItem('klassenauswahl')) { // wenn die klasse dem Localstore entspricht
                         $('#Klassenauswahl').append('<option value=' + value.klasse_id + ' selected>' + value.klasse_name + ' , ' + value.klasse_longname + '</option>'); // Klassen werden gesetzt
+                        $('#InfoKlassenauswahl').addClass("visually-hidden")
                         tabelle() //function tabelle wird aufrufen
                     } else {
+                        
                         $('#Klassenauswahl').append('<option value=' + value.klasse_id + '>' + value.klasse_name + ' , ' + value.klasse_longname + '</option>');// Klassen werden gesetzt
                     }
 
