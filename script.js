@@ -18,6 +18,7 @@ $(document).ready(function () { // wenn der Dom geladen ist
         $('#Datum').text(localStorage.getItem('altesDatum'))
         localStorage.setItem("berufsgruppe", this.value) // wird die Berufsgruppe im Localstorage gespeichert
         localStorage.removeItem("klassenauswahl")
+        $('#InfoBerufsauswahl').addClass("visually-hidden")
         klasse(); // Function Klasse wird aufgerufen
     })
 
@@ -25,6 +26,7 @@ $(document).ready(function () { // wenn der Dom geladen ist
         localStorage.setItem('altesDatum', moment().format('WW-GGGG'))
         $('#Datum').text(localStorage.getItem('altesDatum'))
         localStorage.setItem("klassenauswahl", this.value)  // wird die Klassenauswahl im Localstorage gespeichert
+        $('#InfoKlassenauswahl').addClass("visually-hidden")
         tabelle(); //Function tabelle wird aufgerufen
     })
 
@@ -36,7 +38,7 @@ $(document).ready(function () { // wenn der Dom geladen ist
     }).done(function (data) {
         if (data != '' || data == null) {
             $('#errorMessage').removeClass("alert alert-warning")
-            $('#Berufsgruppe').append('<option value="default" >Ihre Auswahl ... </option>');// Berufgruppefeld wird mit einem AUswahlfeld erweitert
+            $('#Berufsgruppe').append('<option disabled selected>Ihre Auswahl ... </option>');// Berufgruppefeld wird mit einem AUswahlfeld erweitert
             $.each(data, function (key, value) {
                 if (value.beruf_id == localStorage.getItem('berufsgruppe')) { // wenn die Berufid dem Beruf aus dem Localstorage übereinstimmt
                     $('#Berufsgruppe').append('<option value="' + value.beruf_id + '" selected>' + value.beruf_name + '</option>'); // wird in das feld die Berufe gesetzt
@@ -70,7 +72,7 @@ $(document).ready(function () { // wenn der Dom geladen ist
                 $('#InfoKlassenauswahl').removeClass("visually-hidden")
                 $('#TitelKlassenauswahl').removeClass("visually-hidden")  //wird Titel der Klassenauswahl  wird sichbar gesetzt
                 $('#errorMessage').empty()
-                $('#Klassenauswahl').append('<option value="default" >Ihre Auswahl ... </option>'); // wieder wird ein Auswahlvorschlag gegeben
+                $('#Klassenauswahl').append('<option disabled selected >Ihre Auswahl ... </option>'); // wieder wird ein Auswahlvorschlag gegeben
                 $.each(data, function (key, value) {
                     if (value.klasse_id == localStorage.getItem('klassenauswahl')) { // wenn die klasse dem Localstore entspricht
                         $('#Klassenauswahl').append('<option value=' + value.klasse_id + ' selected>' + value.klasse_name + ' , ' + value.klasse_longname + '</option>'); // Klassen werden gesetzt
@@ -138,6 +140,7 @@ $(document).ready(function () { // wenn der Dom geladen ist
                 })
             } else {
                 $('#errorMessage').html('<div class="alert alert-warning">Kein Stundenplan für diese Woche vorhanden</div>')
+                $('#Tabelle').addClass("visually-hidden")
             }
         }).fail(function () {
             $('#errorMessage').html('<div class="alert alert-warning">Fehler bei der API-Abfrage beginnen Sie vom Anfang</div>');  // bei falschen request wird ein error ausgegeben.
